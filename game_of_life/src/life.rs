@@ -20,25 +20,22 @@ impl GameOfLife {
         }
     }
 
-    pub fn run(&mut self) {
-        println!("Initial State");
-        self.board.display();
-
-        for i in 0..self.iterations {
-            let mut new_board: HashSet<(u32, u32)> = HashSet::new();
+    pub fn run(&mut self, verbose: bool) {
+        for _ in 0..self.iterations {
+            let mut new_board: HashSet<(i32, i32)> = HashSet::new();
 
             for cell in self.board.get_cells() {
-                let mut n = self.board.neighbours(*cell);
-                let count = n
-                    .iter()
-                    .filter(|cell| self.board.is_cell_alive(**cell))
-                    .count();
-                if count == 3 || (count == 2 && self.board.is_cell_alive(*cell)) {
+                let count = self.board.neighbours(*cell);
+                if count == 3 && !self.board.is_cell_alive(*cell) {
+                    new_board.insert(*cell);
+                } else if (count == 2 || count == 3) && self.board.is_cell_alive(*cell) {
                     new_board.insert(*cell);
                 }
             }
             self.board.update(new_board);
-            self.board.display();
+            if verbose {
+                self.board.display();
+            }
         }
     }
 }

@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use std::fmt;
 
 pub struct Board {
-    _board: HashSet<(u32, u32)>,
+    _board: HashSet<(i32, i32)>,
     pub cols: u32,
     pub rows: u32,
 }
@@ -17,28 +17,25 @@ impl Board {
             _board: HashSet::new(),
         }
     }
-    /// Checks whether the Cell in the position (x, y) is alive
-    pub fn is_alive(&self, x: u32, y: u32) -> bool {
-        assert!(x < (self.cols + 1));
-        assert!(y < (self.rows + 1));
-        self._board.contains(&(x, y))
-    }
 
-    pub fn is_cell_alive(&self, cell: (u32, u32)) -> bool {
+    pub fn is_cell_alive(&self, cell: (i32, i32)) -> bool {
         self._board.contains(&cell)
     }
 
     // Updates the inner space with the new distribution of cells
-    pub fn update(&mut self, space: HashSet<(u32, u32)>) {
+    pub fn update(&mut self, space: HashSet<(i32, i32)>) {
         self._board = space
     }
     // Returns the neighbours of a given point
-    pub fn neighbours(&self, point: (u32, u32)) -> Vec<(u32, u32)> {
+    pub fn neighbours(&self, point: (i32, i32)) -> usize {
         let (x, y) = point;
-        vec![(x, y + 1), (x, y - 1), (x + 1, y), (x - 1, y)]
+
+        let n = vec![(x, y + 1), (x, y - 1), (x + 1, y), (x - 1, y)];
+        let count = n.iter().filter(|x| self._board.contains(x)).count();
+        count
     }
 
-    pub fn get_cells(&self) -> &HashSet<(u32, u32)> {
+    pub fn get_cells(&self) -> &HashSet<(i32, i32)> {
         &self._board
     }
     // Creates a random number of alive cells inside the space
@@ -46,9 +43,9 @@ impl Board {
         assert!(self.cols != 0);
         assert!(self.rows != 0);
         let mut rng = rand::thread_rng();
-        for i in 0..n {
-            let x = rng.gen_range(1..self.cols + 1);
-            let y = rng.gen_range(1..self.rows + 1);
+        for _ in 0..n {
+            let x: i32 = rng.gen_range(0..self.cols) as i32;
+            let y: i32 = rng.gen_range(0..self.rows) as i32;
             self._board.insert((x, y));
         }
     }
@@ -61,8 +58,8 @@ impl Board {
         println!("{}", "=".repeat(self.cols as usize));
         for i in 1..self.cols + 1 {
             for j in 1..self.rows + 1 {
-                match self._board.contains(&(i, j)) {
-                    true => print!("@"),
+                match self._board.contains(&(i as i32, j as i32)) {
+                    true => print!("*"),
                     false => print!("#"),
                 }
             }
