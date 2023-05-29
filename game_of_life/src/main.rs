@@ -14,12 +14,6 @@ fn main() {
     let verbosity = args.v;
 
     let mut game_of_life = GameOfLife::new(dimensions, iterations, n_points);
-    let initial_cells = game_of_life.board.alive_cells();
-    game_of_life.board.display();
+    println!("{:?}", game_of_life);
     game_of_life.run(verbosity);
-    println!(
-        "Initial alive cells were: {} and final alive cells are: {}",
-        initial_cells,
-        game_of_life.board.alive_cells()
-    );
 }

@@ -34,7 +34,8 @@ impl GameOfLife {
             }
             self.board.update(new_board);
             if verbose {
-                self.board.display();
+                println!("{}", self.board);
+                std::thread::sleep(std::time::Duration::from_secs(1));
             }
         }
     }
@@ -42,11 +43,10 @@ impl GameOfLife {
 
 impl fmt::Debug for GameOfLife {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let separator = "=".repeat(100);
+        let separator = "=".repeat(self.board.cols as usize);
         write!(f, "GAME OF LIFE - Conway's\n")?;
         write!(f, "{}", separator)?;
         write!(f, "\n Running for {} iterations", self.iterations)?;
-        write!(f, "\n With initially {} cells alive", self.initial_points)?;
-        write!(f, "\n With the following space: \n{:?}", self.board)
+        write!(f, "\n With initially {} cells alive", self.initial_points)
     }
 }

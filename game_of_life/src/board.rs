@@ -1,4 +1,4 @@
-use rand::Rng;
+use rand::prelude::*;
 use std::collections::HashSet;
 use std::fmt;
 
@@ -42,30 +42,31 @@ impl Board {
     pub fn create_random_points(&mut self, n: u32) {
         assert!(self.cols != 0);
         assert!(self.rows != 0);
+        assert!(n <= self.rows * self.cols);
         let mut rng = rand::thread_rng();
-        for _ in 0..n {
-            let x: i32 = rng.gen_range(0..self.cols) as i32;
-            let y: i32 = rng.gen_range(0..self.rows) as i32;
-            self._board.insert((x, y));
-        }
+
+        (0..self.cols as i32)
+            .flat_map(|i| (0..self.rows as i32).map(move |j| (i, j)))
+            .into_iter()
+            .choose_multiple(&mut rng, n as usize)
+            .into_iter()
+            .for_each(|(i, j)| {
+                self._board.insert((i, j));
+            });
     }
     // Returns the number of alive cells in the space
     pub fn alive_cells(&self) -> usize {
         self._board.len()
     }
 
-    pub fn display(&self) {
-        println!("{}", "=".repeat(self.cols as usize));
-        for i in 1..self.cols + 1 {
-            for j in 1..self.rows + 1 {
-                match self._board.contains(&(i as i32, j as i32)) {
-                    true => print!("*"),
-                    false => print!("#"),
-                }
-            }
-            println!("");
+    pub fn get_character(&self, i: u32, j: u32) -> &str {
+        if j == self.rows {
+            return "\n";
         }
-        println!("{}\n", "=".repeat(self.cols as usize));
+        match self._board.contains(&(i as i32, j as i32)) {
+            true => "*",
+            false => "#",
+        }
     }
 }
 
@@ -79,6 +80,19 @@ impl fmt::Debug for Board {
         write!(f, "\n{:?}", self._board)
     }
 }
+
+impl fmt::Display for Board {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "{}", "=".repeat(self.cols as usize))?;
+
+        (1..=self.cols)
+            .flat_map(|i| (1..=self.rows).map(move |j| (i, j)))
+            .for_each(|(i, j)| write!(f, "{}", self.get_character(i, j)).unwrap());
+
+        writeln!(f, "{}\n", "=".repeat(self.cols as usize))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -102,17 +116,17 @@ mod tests {
     #[test]
     fn check_point_in_board() {
         let board = create_board(10, 10);
-        assert_eq!(board.is_alive(0, 0), false);
+        assert_eq!(board.is_cell_alive((0, 0)), false);
     }
 
     #[test]
     fn check_update_space() {
         let mut board = create_board(10, 10);
-        assert_eq!(board.is_alive(0, 0), false);
+        assert_eq!(board.is_cell_alive((0, 0)), false);
         let mut new_board = HashSet::new();
         new_board.insert((0, 0));
         board.update(new_board);
-        assert_eq!(board.is_alive(0, 0), true);
+        assert_eq!(board.is_cell_alive((0, 0)), true);
     }
 
     #[test]
